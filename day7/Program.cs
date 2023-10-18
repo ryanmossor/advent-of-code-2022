@@ -4,7 +4,7 @@ string line;
 try {
     using (StreamReader reader = new StreamReader("./input.txt")) {
         line = reader.ReadLine();
-        Node rootDir = new Node(name: "/", isDirectory: true, parent: null, filesize: 0);
+        Node rootDir = new Node(name: "/", parent: null, filesize: 0);
         Node cwd = rootDir;
         while (line != null) {
             var words = line.Split(" ");
@@ -15,7 +15,7 @@ try {
             } else if (line.Equals("$ cd ..")) {
                 cwd = cwd.Parent;
             } else if (line.StartsWith("$ cd")) {
-                var newDir = new Node(name: words[2], isDirectory: true, parent: cwd, filesize: 0);
+                var newDir = new Node(name: words[2], parent: cwd, filesize: 0);
                 cwd.AddChild(newDir);
                 cwd = newDir;
             } else {
@@ -23,7 +23,7 @@ try {
                 var filename = words[1];
                 int.TryParse(filesize, out var size);
                 if (size != null && size != 0) {
-                    var file = new Node(name: filename, isDirectory: false, parent: cwd, filesize: size);
+                    var file = new Node(name: filename, parent: cwd, filesize: size);
                     cwd.AddChild(file);
                 }
             }
@@ -48,13 +48,12 @@ class Node {
     public int Filesize { get; set; }
     public bool IsDirectory { get; set; }
 
-    public Node(string name, bool isDirectory, Node? parent, int? filesize)
+    public Node(string name, Node? parent, int? filesize)
     {
         Name = name;
         Parent = parent;
         Children = new List<Node>();
         Filesize = filesize ?? 0;
-        IsDirectory = isDirectory;
     }
 
     public void AddChild(Node node) {
@@ -81,7 +80,7 @@ class Node {
             return 0;
 
         int total = 0;
-        if (Filesize < maxSize)
+        if (Filesize <= maxSize)
             total += Filesize;
 
         foreach (var child in Children)
